@@ -1,0 +1,7 @@
+# Sensitive configuration with credentials and API keys
+config.properties
+
+# Compiled Java class files
+*.class
+bin/
+

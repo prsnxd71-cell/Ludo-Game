@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classic Ludo with Perks</title>
+    <link rel="stylesheet" href="style1.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- User Badge in Top-Right Corner -->
+    <div id="user-badge" class="auth-user-badge" style="display: none;">
+        <span><i class="fas fa-user-check" style="color: #4caf50;"></i> <span id="user-phone-text"></span></span>
+        <button onclick="logout()">Logout</button>
+    </div>
+
+    <!-- Phone OTP Login Screen Overlay -->
+    <div id="auth-screen" class="overlay">
+        <div class="modal auth-modal">
+            <h1><i class="fas fa-dice"></i> LUDO</h1>
+            <p>Login with your Phone Number to play & record moves</p>
+            
+            <div id="auth-phone-section">
+                <div class="input-group">
+                    <span class="country-code">+91</span>
+                    <input type="tel" id="auth-phone" placeholder="10-digit number" maxlength="10">
+                </div>
+                <button id="send-otp-btn" onclick="requestOtp()">Send OTP via MiniMoth</button>
+            </div>
+
+            <div id="auth-otp-section" style="display: none;">
+                <p class="auth-subtext">Enter the 6-digit OTP sent to <b id="otp-phone-display"></b>:</p>
+                <div class="input-group">
+                    <input type="text" id="auth-code" placeholder="6-digit OTP" maxlength="6">
+                </div>
+                <button id="verify-otp-btn" onclick="verifyOtp()">Verify & Continue</button>
+                <button class="btn-secondary" onclick="backToPhoneInput()">Change Number</button>
+            </div>
+
+            <div id="auth-error" class="auth-message error" style="display: none;"></div>
+            <div id="auth-success" class="auth-message success" style="display: none;"></div>
+        </div>
+    </div>
+
+    <div id="setup-screen" class="overlay" style="display: none;">
+        <div class="modal">
+            <h1>LUDO</h1>
+            <div id="resume-game-banner" style="display: none; background: #e8f5e9; border: 1px solid #81c784; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                <p style="margin: 0 0 10px 0; font-weight: bold; color: #2e7d32;" id="resume-banner-text">Ongoing match found!</p>
+                <div style="display: flex; gap: 10px; justify-content: center;">
+                    <button id="resume-btn" onclick="resumeActiveGame()" style="background: #2e7d32;">Resume Match</button>
+                    <button class="btn-secondary" onclick="discardAndStartNewGame()">New Match</button>
+                </div>
+            </div>
+            <p>Select number of players:</p>
+            <div class="setup-buttons">
+                <button onclick="choosePlayerCount(2)">2 Players</button>
+                <button onclick="choosePlayerCount(3)">3 Players</button>
+                <button onclick="choosePlayerCount(4)">4 Players</button>
+            </div>
+            <p class="setup-note">
+                2 Players: Choose any 2 distinct colors<br>
+                3 Players: Choose any 3 distinct colors<br>
+                4 Players: All 4 colors<br><br>
+                <b>Tip: You can press Spacebar to roll the dice!</b><br>
+                <b>🎁 Watch out for Surprise Perks on the board!</b>
+            </p>
+        </div>
+    </div>
+
+    <!-- Player Setup Screen (Names & Color Selection) -->
+    <div id="player-setup-screen" class="overlay" style="display: none;">
+        <div class="modal player-setup-modal">
+            <h1><i class="fas fa-users-cog"></i> Player Setup</h1>
+            <p>Enter each player's name and choose their color:</p>
+            
+            <div id="player-input-fields" class="player-input-fields">
+                <!-- Dynamically generated rows -->
+            </div>
+
+            <div id="player-setup-error" class="auth-message error" style="display: none;"></div>
+
+            <div class="setup-actions">
+                <button id="start-game-btn" onclick="submitPlayerSetup()">Start Game</button>
+                <button class="btn-secondary" onclick="backToPlayerCountSelect()">Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Results & Rankings Screen -->
+    <div id="winner-screen" class="overlay" style="display: none;">
+        <div class="modal results-modal">
+            <h1>🏁 GAME OVER 🏁</h1>
+            <h2 id="winner-text"></h2>
+            
+            <div id="rankings-container" class="rankings-container">
+                <!-- Ranked players cards -->
+            </div>
+
+            <div class="results-actions">
+                <button id="analyze-game-btn" onclick="openGameAnalysis()">📊 Analyze Game</button>
+                <button class="btn-secondary" onclick="location.reload()">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post-Game Analysis Modal -->
+    <div id="analysis-modal" class="overlay" style="display: none;">
+        <div class="modal analysis-modal-box">
+            <div class="analysis-header">
+                <h2><i class="fas fa-chart-bar"></i> Game Analysis & Statistics</h2>
+                <button class="close-btn" onclick="closeGameAnalysis()">&times;</button>
+            </div>
+
+            <div id="analysis-content" class="analysis-content">
+                <div style="text-align: center; padding: 20px;">Loading game data from MySQL...</div>
+            </div>
+
+            <div class="analysis-footer">
+                <button onclick="closeGameAnalysis()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Surprise Perk Notification Overlay -->
+    <div id="perk-alert" class="perk-alert" style="display: none;"></div>
+
+    <!-- Main Game Container -->
+    <div class="game-container" id="game-container" style="display: none;">
+        
+        <!-- UI Side Panel -->
+        <div class="side-panel">
+            <div class="player-indicators">
+                <div id="panel-red" class="player-panel red-panel">RED</div>
+                <div id="panel-green" class="player-panel green-panel">GREEN</div>
+            </div>
+            
+            <div class="controls-card">
+                <h2 id="turn-indicator">Current Turn: BLUE</h2>
+                
+                <div id="dice-container">
+                    <div id="dice-value">🎲</div>
+                    <button id="roll-btn" onclick="rollDice()">Roll Dice</button>
+                </div>
+                
+                <div id="game-log"></div>
+                <button id="leave-game-btn" class="btn-leave" onclick="confirmLeaveGame()"><i class="fas fa-sign-out-alt"></i> Leave Game</button>
+            </div>
+
+            <div class="player-indicators">
+                <div id="panel-blue" class="player-panel blue-panel">BLUE</div>
+                <div id="panel-yellow" class="player-panel yellow-panel">YELLOW</div>
+            </div>
+        </div>
+
+        <!-- The Ludo Board -->
+        <div id="ludo-board">
+            <div id="grid-container"></div>
+            <div id="pieces-container"></div>
+        </div>
+        
+    </div>
+
+    <script src="game1.js"></script>
+</body>
+</html>
