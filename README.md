@@ -436,3 +436,4 @@ To run the verification test suite:
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE) — feel free to modify and build upon it for learning and personal projects.
+
