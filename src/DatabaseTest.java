@@ -26,19 +26,9 @@ public class DatabaseTest {
         String dbName = Config.getDbName();
         String user = Config.getDbUser();
         String pass = Config.getDbPassword();
-        String useSsl = Config.getDbUseSsl();
-        String customUrl = Config.getDbUrl();
 
-        String jdbcUrl;
-        if (customUrl != null && !customUrl.trim().isEmpty()) {
-            jdbcUrl = customUrl.trim();
-            if (jdbcUrl.startsWith("mysql://")) {
-                jdbcUrl = "jdbc:" + jdbcUrl;
-            }
-        } else {
-            jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + dbName
-                    + "?useSSL=" + useSsl + "&allowPublicKeyRetrieval=true&serverTimezone=UTC";
-        }
+        String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + dbName
+                + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
 
         System.out.println("[INFO] Target JDBC URL: " + jdbcUrl);
         System.out.println("[INFO] Connecting as user: " + user);

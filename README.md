@@ -23,7 +23,6 @@ A complete, responsive, full-stack implementation of the classic **Ludo** board 
 - [Database Setup](#-database-setup)
 - [Configuration](#-configuration)
 - [How to Run](#-how-to-run)
-- [Deployment on Render (Docker)](#-deployment-on-render-docker)
 - [Game Rules & Mechanics](#-game-rules--mechanics)
 - [Automated Testing Suite](#-automated-testing-suite)
 - [Troubleshooting & FAQ](#-troubleshooting--faq)
@@ -128,35 +127,28 @@ Evenly spaced on the board (cells `5`, `11`, `18`, `24`, `31`, `37`, `44`, `50`)
 
 ```text
 Ludo-Game/
-├── backend/
-│   ├── src/
-│   │   ├── Config.java              # Configuration loader for config.properties
-│   │   ├── Database.java            # Reusable JDBC connection, queries & safe DDL
-│   │   ├── DatabaseTest.java        # Simple JDBC connection verification script
-│   │   ├── GameServer.java          # Java HTTP server, REST endpoints & static file server
-│   │   ├── MiniMothClient.java      # MiniMoth REST API client (send & verify OTP)
-│   │   ├── MoveValidator.java       # Server-side validation for game moves & perks
-│   │   ├── SessionManager.java      # In-memory cryptographically secure session manager
-│   │   ├── SimpleJson.java          # Zero-dependency, lightweight JSON parser & builder
-│   │   └── BackendTest.java         # 10-point comprehensive backend verification test suite
-│   ├── lib/
-│   │   └── mysql-connector-java-8.0.28.jar   # Official MySQL JDBC Driver
-│   ├── bin/                         # Compiled Java .class binaries (generated, gitignored)
-│   ├── Dockerfile                   # Multi-stage production container for Render
-│   ├── .dockerignore                # Excludes bin and local secrets from container
-│   └── config.properties            # Local configuration (credentials & port, gitignored)
-│
-├── frontend/
-│   ├── images/
-│   │   ├── blue-piece.png           # Realistic 3D piece for Blue player
-│   │   ├── red-piece.png            # Realistic 3D piece for Red player
-│   │   ├── green-piece.png          # Realistic 3D piece for Green player
-│   │   └── yellow-piece.png         # Realistic 3D piece for Yellow player
-│   ├── index.html                   # Single-page game entry point & UI overlays
-│   ├── style.css                    # Consolidated responsive stylesheet
-│   └── game.js                      # Consolidated game engine & frontend API client
-│
-├── .gitignore                       # Ignores config.properties, *.class, bin/
+├── src/
+│   ├── Config.java              # Configuration loader for local config.properties
+│   ├── Database.java            # Reusable JDBC connection, queries & safe DDL
+│   ├── DatabaseTest.java        # Simple JDBC connection verification script
+│   ├── GameServer.java          # Java HTTP server, REST endpoints & static file server
+│   ├── MiniMothClient.java      # MiniMoth REST API client (send & verify OTP)
+│   ├── MoveValidator.java       # Server-side validation for game moves & perks
+│   ├── SessionManager.java      # In-memory cryptographically secure session manager
+│   ├── SimpleJson.java          # Zero-dependency, lightweight JSON parser & builder
+│   └── BackendTest.java         # 10-point comprehensive backend verification test suite
+├── lib/
+│   └── mysql-connector-java-8.0.28.jar   # Official MySQL JDBC Driver
+├── bin/                         # Compiled Java .class binaries (generated, gitignored)
+├── config.properties            # Local configuration (credentials & port, gitignored)
+├── index.html                   # Single-page game entry point & UI overlays
+├── style.css                    # Consolidated responsive stylesheet
+├── game.js                      # Consolidated game engine & frontend API client
+├── blue-piece.png               # Realistic 3D piece for Blue player
+├── red-piece.png                # Realistic 3D piece for Red player
+├── green-piece.png              # Realistic 3D piece for Green player
+├── yellow-piece.png             # Realistic 3D piece for Yellow player
+├── .gitignore                   # Ignores config.properties, *.class, bin/, imp.txt
 ├── .gitattributes                   # Line-ending & git configuration
 └── README.md                        # Comprehensive project documentation
 ```
@@ -195,7 +187,7 @@ CREATE DATABASE IF NOT EXISTS `ludo_db` DEFAULT CHARACTER SET utf8mb4 COLLATE ut
 
 ### Step 3: Verified Database Schema
 
-The Java backend (`backend/src/Database.java`) verifies and creates the following relational tables automatically upon startup:
+The Java backend (`src/Database.java`) verifies and creates the following relational tables automatically upon startup:
 
 #### 1. `games` Table
 Stores overall match records, player counts, statuses, and full board state snapshots.
@@ -253,7 +245,7 @@ CREATE TABLE IF NOT EXISTS `movements` (
 
 ## 🔧 Configuration
 
-Create or update `backend/config.properties`. This file stores local database credentials, server settings, and your MiniMoth API key:
+Create or update `config.properties` in the project root. This file stores local database credentials, server settings, and your MiniMoth API key:
 
 ```properties
 # ==========================================
@@ -288,37 +280,24 @@ server.port=8080
 Ensure XAMPP MySQL is running on port `3306`.
 
 ### Step 2: Compile the Java Backend
-You can compile either from the `backend/` folder or from the project root:
+Compile all Java source files from the project root:
 
-- **Option A: From `backend/` directory (Recommended):**
-  ```powershell
-  cd backend
-  javac -cp "lib/*;src" -d bin src/*.java
-  ```
-  *(On Linux/macOS, use `:` instead of `;`: `javac -cp "lib/*:src" -d bin src/*.java`)*
-
-- **Option B: From project root (`Ludo-Game/`):**
-  ```powershell
-  javac -cp "backend/lib/*;backend/src" -d backend/bin backend/src/*.java
-  ```
+```powershell
+javac -cp "lib/*;src" -d bin src/*.java
+```
+*(On Linux/macOS, use `:` instead of `;`: `javac -cp "lib/*:src" -d bin src/*.java`)*
 
 ### Step 3: Start the Game Server
 Launch the HTTP server:
 
-- **From `backend/` directory:**
-  ```powershell
-  java -cp "bin;lib/*" GameServer
-  ```
-  *(On Linux/macOS: `java -cp "bin:lib/*" GameServer`)*
-
-- **Or from project root (`Ludo-Game/`):**
-  ```powershell
-  java -cp "backend/bin;backend/lib/*" GameServer
-  ```
+```powershell
+java -cp "bin;lib/*" GameServer
+```
+*(On Linux/macOS: `java -cp "bin:lib/*" GameServer`)*
 
 **Expected Console Output:**
-```
-[CONFIG] Successfully loaded c:\...\LUDO\backend\config.properties
+```text
+[CONFIG] Successfully loaded c:\...\LUDO\config.properties
 [DB] Verified table 'users' exists.
 [DB] Verified table 'movements' exists.
 [DB] Verified column 'last_activity' exists in 'games'.
@@ -339,63 +318,7 @@ http://localhost:8080
 3. Select the number of players (2, 3, or 4) and customize player names.
 4. Click **Start Game** and enjoy playing!
 
----
 
-## ☁️ Deployment on Render (Docker)
-
-The project is pre-configured for seamless containerized deployment on [Render](https://render.com) as a **Web Service**, while fully preserving local development with XAMPP.
-
-### 1. Architecture Overview
-- **Containerization:** The Java backend, JDBC driver, and all frontend assets (HTML, CSS, JavaScript, realistic 3D piece images) are packaged inside a lightweight OpenJDK 17 Docker container (`backend/Dockerfile`).
-- **Dynamic Port Binding:** Render dynamically assigns an execution port through the `PORT` environment variable. The Java server detects `PORT` automatically and binds to `0.0.0.0:$PORT` (falling back to port `8080` for local runs).
-- **Dual Configuration System:** In production, Render environment variables take precedence over local files. Locally, the server seamlessly loads `config.properties`.
-- **Database Connection:** Connects to any cloud-hosted MySQL database (such as [Aiven](https://aiven.io), [Railway](https://railway.app), [Clever Cloud](https://www.clever-cloud.com), etc.). Secure SSL (`useSSL=true`) is automatically enabled for all remote cloud hosts.
-
----
-
-### 2. Render Web Service Settings
-
-When creating a new **Web Service** on the Render dashboard, configure:
-
-| Setting | Value | Notes |
-|---|---|---|
-| **Repository** | `https://github.com/prsnxd71-cell/Ludo-Game` | Connect your GitHub repository |
-| **Branch** | `main` | Production branch |
-| **Runtime** | `Docker` | Uses the Docker engine |
-| **Root Directory** | *(leave blank / default)* | Project root |
-| **Docker Build Context** | `backend` | Sets Docker context to the `backend/` directory |
-| **Dockerfile Path** | `backend/Dockerfile` | Relative path to the Dockerfile |
-
----
-
-### 3. Environment Variables on Render
-
-In the Render dashboard under **Environment**, configure the following variables (never commit these to GitHub):
-
-| Variable | Description | Example / Default |
-|---|---|---|
-| `PORT` | Web service listening port | Automatically provided by Render |
-| `DB_HOST` | Hostname of your external cloud MySQL instance | `mysql-xxxx.aivencloud.com` |
-| `DB_PORT` | Port of your external cloud MySQL instance | `3306` (or provider port) |
-| `DB_NAME` | Database name | `ludo_db` |
-| `DB_USER` | MySQL database username | `avnadmin` or `root` |
-| `DB_PASSWORD` | MySQL database password | `your_cloud_db_password` |
-| `DB_USE_SSL` | Enable/disable SSL for database connection | `true` (auto-defaults to `true` for remote hosts) |
-| `MINIMOTH_API_KEY` | MiniMoth API key for phone OTP authentication | `your_minimoth_api_key` |
-
-> [!TIP]
-> Alternatively, if your cloud MySQL provider provides a single connection string (e.g., `mysql://user:pass@host:port/dbname`), you can supply it as `MYSQL_URL` or `DATABASE_URL`.
-
----
-
-### 4. Automatic Database Provisioning in Production
-Upon container startup on Render, `GameServer` will:
-1. Connect securely to your cloud MySQL database using the configured credentials.
-2. Automatically execute safe `CREATE TABLE IF NOT EXISTS` migrations for `games`, `users`, and `movements`.
-3. Check and recover any stale active games.
-4. Serve the full responsive game UI and API at your Render service URL (e.g., `https://ludo-game-xxxx.onrender.com`).
-
----
 
 ## 🎯 Game Rules & Mechanics
 
@@ -435,21 +358,14 @@ Upon container startup on Render, `GameServer` will:
 
 ## 🧪 Automated Testing Suite
 
-The repository includes a comprehensive 10-point test suite in `backend/src/BackendTest.java` that validates database operations, session lifecycles, and move rules without modifying live game data.
+The repository includes a comprehensive 10-point test suite in `src/BackendTest.java` that validates database operations, session lifecycles, and move rules without modifying live game data.
 
 To run the verification test suite:
 
-- **From `backend/` directory (Recommended):**
-  ```powershell
-  cd backend
-  java -cp "bin;lib/*" BackendTest
-  ```
-  *(On Linux/macOS: `java -cp "bin:lib/*" BackendTest`)*
-
-- **Or from project root (`Ludo-Game/`):**
-  ```powershell
-  java -cp "backend/bin;backend/lib/*" BackendTest
-  ```
+```powershell
+java -cp "bin;lib/*" BackendTest
+```
+*(On Linux/macOS: `java -cp "bin:lib/*" BackendTest`)*
 
 ### Test Coverage
 

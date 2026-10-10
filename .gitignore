@@ -1,11 +1,9 @@
 # Sensitive configuration with credentials and API keys
 config.properties
-backend/config.properties
 
 # Compiled Java class files
 *.class
 bin/
-backend/bin/
 
 # Local scratch / notes
 imp.txt

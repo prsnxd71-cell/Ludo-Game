@@ -1,6 +1,0 @@
-# Exclude compiled binaries and build artifacts
-bin/
-*.class
-
-# Exclude local configuration and credentials
-config.properties

@@ -626,10 +626,10 @@ function createPieces() {
   container.innerHTML = "";
 
   const pieceImages = {
-    blue: "images/blue-piece.png",
-    red: "images/red-piece.png",
-    green: "images/green-piece.png",
-    yellow: "images/yellow-piece.png",
+    blue: "blue-piece.png",
+    red: "red-piece.png",
+    green: "green-piece.png",
+    yellow: "yellow-piece.png",
   };
 
   for (let color of activePlayers) {
@@ -651,7 +651,7 @@ function createPieces() {
 
       // Create the realistic 3D piece image
       const img = document.createElement("img");
-      img.src = pieceImages[color] || `images/${color}-piece.png`;
+      img.src = pieceImages[color] || `${color}-piece.png`;
       img.alt = `${color.toUpperCase()} piece`;
       img.className = "piece-img";
       img.draggable = false;

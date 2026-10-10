@@ -30,7 +30,7 @@ public class GameServer {
         } catch (SQLException e) {
             System.err.println("[DB FATAL] Database connection failed: " + e.getMessage());
             System.err.println("           Target host: " + Config.getDbHost() + ":" + Config.getDbPort() + ", database: " + Config.getDbName());
-            System.err.println("           Please ensure MySQL is running (XAMPP locally or cloud MySQL instance in production).");
+            System.err.println("           Please ensure MySQL in XAMPP is running on port " + Config.getDbPort());
             System.exit(1);
         }
 
@@ -568,12 +568,10 @@ public class GameServer {
 
             // Remove leading slash
             String relativePath = path.startsWith("/") ? path.substring(1) : path;
-            File file = new File("frontend", relativePath);
-            if (!file.exists() || file.isDirectory()) {
-                file = new File("../frontend", relativePath);
-            }
-            if (!file.exists() || file.isDirectory()) {
-                file = new File(relativePath);
+            File file = new File(relativePath);
+            // Fallback for requests asking for images/xxx-piece.png when pieces are at root
+            if (!file.exists() && relativePath.startsWith("images/")) {
+                file = new File(relativePath.substring("images/".length()));
             }
 
             if (!file.exists() || file.isDirectory()) {
