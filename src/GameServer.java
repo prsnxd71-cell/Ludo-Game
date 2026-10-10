@@ -569,7 +569,14 @@ public class GameServer {
             // Remove leading slash
             String relativePath = path.startsWith("/") ? path.substring(1) : path;
             File file = new File(relativePath);
-            // Fallback for requests asking for images/xxx-piece.png when pieces are at root
+            // Fallback: check images/ folder if file requested without images/ prefix
+            if (!file.exists()) {
+                File imgFile = new File("images", relativePath);
+                if (imgFile.exists() && !imgFile.isDirectory()) {
+                    file = imgFile;
+                }
+            }
+            // Fallback: strip images/ if requested with images/ prefix but at root
             if (!file.exists() && relativePath.startsWith("images/")) {
                 file = new File(relativePath.substring("images/".length()));
             }

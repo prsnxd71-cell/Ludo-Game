@@ -50,7 +50,7 @@ This project brings the traditional Indian board game *Pachisi* / *Ludo* to life
 - Turn indicator displays whose turn it is, complete with matching player-themed banners.
 
 ### 2. Realistic 3D Ludo Pieces
-- High-resolution, authentic 3D pawn pieces with transparent backgrounds for each player color (`blue-piece.png`, `red-piece.png`, `green-piece.png`, `yellow-piece.png`).
+- High-resolution, authentic 3D pawn pieces with transparent backgrounds for each player color (`images/blue-piece.png`, `images/red-piece.png`, `images/green-piece.png`, `images/yellow-piece.png`).
 - Fluid CSS step-by-step movement animations and golden glow highlights for playable tokens.
 - Smart stacking geometry with symmetrical offsets and scaling so multiple pieces on the same square never hide each other.
 - Responsive design with automatic re-centering during window resizing.
@@ -144,10 +144,11 @@ Ludo-Game/
 ├── index.html                   # Single-page game entry point & UI overlays
 ├── style.css                    # Consolidated responsive stylesheet
 ├── game.js                      # Consolidated game engine & frontend API client
-├── blue-piece.png               # Realistic 3D piece for Blue player
-├── red-piece.png                # Realistic 3D piece for Red player
-├── green-piece.png              # Realistic 3D piece for Green player
-├── yellow-piece.png             # Realistic 3D piece for Yellow player
+├── images/
+│   ├── blue-piece.png           # Realistic 3D piece for Blue player
+│   ├── red-piece.png            # Realistic 3D piece for Red player
+│   ├── green-piece.png          # Realistic 3D piece for Green player
+│   └── yellow-piece.png         # Realistic 3D piece for Yellow player
 ├── .gitignore                   # Ignores config.properties, *.class, bin/, imp.txt
 ├── .gitattributes                   # Line-ending & git configuration
 └── README.md                        # Comprehensive project documentation
