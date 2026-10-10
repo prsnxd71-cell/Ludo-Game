@@ -17,14 +17,30 @@ public class Database {
     }
 
     public static Connection getConnection() throws SQLException {
-        String host = Config.getDbHost();
-        String port = Config.getDbPort();
-        String dbName = Config.getDbName();
+        String customUrl = Config.getDbUrl();
         String user = Config.getDbUser();
         String pass = Config.getDbPassword();
 
+        if (customUrl != null && !customUrl.trim().isEmpty()) {
+            String url = customUrl.trim();
+            if (url.startsWith("mysql://")) {
+                url = "jdbc:" + url;
+            }
+            if (user != null && !user.isEmpty()) {
+                return DriverManager.getConnection(url, user, pass);
+            } else {
+                return DriverManager.getConnection(url);
+            }
+        }
+
+        String host = Config.getDbHost();
+        String port = Config.getDbPort();
+        String dbName = Config.getDbName();
+        String useSsl = Config.getDbUseSsl();
+
         String url = "jdbc:mysql://" + host + ":" + port + "/" + dbName
-                + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8";
+                + "?useSSL=" + useSsl
+                + "&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8";
 
         return DriverManager.getConnection(url, user, pass);
     }

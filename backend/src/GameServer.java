@@ -29,7 +29,8 @@ public class GameServer {
             System.out.println("[DB] Connected to MySQL and verified schema.");
         } catch (SQLException e) {
             System.err.println("[DB FATAL] Database connection failed: " + e.getMessage());
-            System.err.println("           Please ensure MySQL in XAMPP is running on port " + Config.getDbPort());
+            System.err.println("           Target host: " + Config.getDbHost() + ":" + Config.getDbPort() + ", database: " + Config.getDbName());
+            System.err.println("           Please ensure MySQL is running (XAMPP locally or cloud MySQL instance in production).");
             System.exit(1);
         }
 

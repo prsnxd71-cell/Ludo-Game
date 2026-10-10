@@ -23,6 +23,7 @@ A complete, responsive, full-stack implementation of the classic **Ludo** board 
 - [Database Setup](#-database-setup)
 - [Configuration](#-configuration)
 - [How to Run](#-how-to-run)
+- [Deployment on Render (Docker)](#-deployment-on-render-docker)
 - [Game Rules & Mechanics](#-game-rules--mechanics)
 - [Automated Testing Suite](#-automated-testing-suite)
 - [Troubleshooting & FAQ](#-troubleshooting--faq)
@@ -141,6 +142,8 @@ Ludo-Game/
 │   ├── lib/
 │   │   └── mysql-connector-java-8.0.28.jar   # Official MySQL JDBC Driver
 │   ├── bin/                         # Compiled Java .class binaries (generated, gitignored)
+│   ├── Dockerfile                   # Multi-stage production container for Render
+│   ├── .dockerignore                # Excludes bin and local secrets from container
 │   └── config.properties            # Local configuration (credentials & port, gitignored)
 │
 ├── frontend/
@@ -335,6 +338,62 @@ http://localhost:8080
 2. Enter the OTP code received via WhatsApp / SMS and click **Verify & Login**.
 3. Select the number of players (2, 3, or 4) and customize player names.
 4. Click **Start Game** and enjoy playing!
+
+---
+
+## ☁️ Deployment on Render (Docker)
+
+The project is pre-configured for seamless containerized deployment on [Render](https://render.com) as a **Web Service**, while fully preserving local development with XAMPP.
+
+### 1. Architecture Overview
+- **Containerization:** The Java backend, JDBC driver, and all frontend assets (HTML, CSS, JavaScript, realistic 3D piece images) are packaged inside a lightweight OpenJDK 17 Docker container (`backend/Dockerfile`).
+- **Dynamic Port Binding:** Render dynamically assigns an execution port through the `PORT` environment variable. The Java server detects `PORT` automatically and binds to `0.0.0.0:$PORT` (falling back to port `8080` for local runs).
+- **Dual Configuration System:** In production, Render environment variables take precedence over local files. Locally, the server seamlessly loads `config.properties`.
+- **Database Connection:** Connects to any cloud-hosted MySQL database (such as [Aiven](https://aiven.io), [Railway](https://railway.app), [Clever Cloud](https://www.clever-cloud.com), etc.). Secure SSL (`useSSL=true`) is automatically enabled for all remote cloud hosts.
+
+---
+
+### 2. Render Web Service Settings
+
+When creating a new **Web Service** on the Render dashboard, configure:
+
+| Setting | Value | Notes |
+|---|---|---|
+| **Repository** | `https://github.com/prsnxd71-cell/Ludo-Game` | Connect your GitHub repository |
+| **Branch** | `main` | Production branch |
+| **Runtime** | `Docker` | Uses the Docker engine |
+| **Root Directory** | *(leave blank / default)* | Project root |
+| **Docker Build Context** | `backend` | Sets Docker context to the `backend/` directory |
+| **Dockerfile Path** | `backend/Dockerfile` | Relative path to the Dockerfile |
+
+---
+
+### 3. Environment Variables on Render
+
+In the Render dashboard under **Environment**, configure the following variables (never commit these to GitHub):
+
+| Variable | Description | Example / Default |
+|---|---|---|
+| `PORT` | Web service listening port | Automatically provided by Render |
+| `DB_HOST` | Hostname of your external cloud MySQL instance | `mysql-xxxx.aivencloud.com` |
+| `DB_PORT` | Port of your external cloud MySQL instance | `3306` (or provider port) |
+| `DB_NAME` | Database name | `ludo_db` |
+| `DB_USER` | MySQL database username | `avnadmin` or `root` |
+| `DB_PASSWORD` | MySQL database password | `your_cloud_db_password` |
+| `DB_USE_SSL` | Enable/disable SSL for database connection | `true` (auto-defaults to `true` for remote hosts) |
+| `MINIMOTH_API_KEY` | MiniMoth API key for phone OTP authentication | `your_minimoth_api_key` |
+
+> [!TIP]
+> Alternatively, if your cloud MySQL provider provides a single connection string (e.g., `mysql://user:pass@host:port/dbname`), you can supply it as `MYSQL_URL` or `DATABASE_URL`.
+
+---
+
+### 4. Automatic Database Provisioning in Production
+Upon container startup on Render, `GameServer` will:
+1. Connect securely to your cloud MySQL database using the configured credentials.
+2. Automatically execute safe `CREATE TABLE IF NOT EXISTS` migrations for `games`, `users`, and `movements`.
+3. Check and recover any stale active games.
+4. Serve the full responsive game UI and API at your Render service URL (e.g., `https://ludo-game-xxxx.onrender.com`).
 
 ---
 

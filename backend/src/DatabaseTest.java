@@ -19,35 +19,26 @@ public class DatabaseTest {
         System.out.println("  Ludo Game - MySQL JDBC Connection Test    ");
         System.out.println("============================================");
 
-        Properties props = new Properties();
+        // 1. Load configuration using Config class
+        Config.load();
+        String host = Config.getDbHost();
+        String port = Config.getDbPort();
+        String dbName = Config.getDbName();
+        String user = Config.getDbUser();
+        String pass = Config.getDbPassword();
+        String useSsl = Config.getDbUseSsl();
+        String customUrl = Config.getDbUrl();
 
-        // 1. Load configuration from config.properties
-        java.io.File cfgFile = new java.io.File("config.properties");
-        if (!cfgFile.exists()) {
-            cfgFile = new java.io.File("backend/config.properties");
-        }
-        if (!cfgFile.exists()) {
-            cfgFile = new java.io.File("../config.properties");
-        }
-        if (cfgFile.exists()) {
-            try (FileInputStream fis = new FileInputStream(cfgFile)) {
-                props.load(fis);
-                System.out.println("[INFO] Loaded configuration from " + cfgFile.getAbsolutePath());
-            } catch (IOException e) {
-                System.out.println("[WARN] Could not load config.properties (" + e.getMessage() + "), using defaults.");
+        String jdbcUrl;
+        if (customUrl != null && !customUrl.trim().isEmpty()) {
+            jdbcUrl = customUrl.trim();
+            if (jdbcUrl.startsWith("mysql://")) {
+                jdbcUrl = "jdbc:" + jdbcUrl;
             }
         } else {
-            System.out.println("[WARN] config.properties not found on disk, using defaults.");
+            jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + dbName
+                    + "?useSSL=" + useSsl + "&allowPublicKeyRetrieval=true&serverTimezone=UTC";
         }
-
-        String host = props.getProperty("db.host", "localhost");
-        String port = props.getProperty("db.port", "3306");
-        String dbName = props.getProperty("db.name", "ludo_db");
-        String user = props.getProperty("db.user", "root");
-        String pass = props.getProperty("db.password", "");
-
-        String jdbcUrl = "jdbc:mysql://" + host + ":" + port + "/" + dbName
-                + "?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC";
 
         System.out.println("[INFO] Target JDBC URL: " + jdbcUrl);
         System.out.println("[INFO] Connecting as user: " + user);

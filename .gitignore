@@ -7,3 +7,5 @@ backend/config.properties
 bin/
 backend/bin/
 
+# Local scratch / notes
+imp.txt
