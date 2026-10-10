@@ -14,6 +14,12 @@ public class Config {
     public static synchronized void load() {
         if (loaded) return;
         File file = new File("config.properties");
+        if (!file.exists()) {
+            file = new File("backend/config.properties");
+        }
+        if (!file.exists()) {
+            file = new File("../config.properties");
+        }
         if (file.exists()) {
             try (FileInputStream fis = new FileInputStream(file)) {
                 properties.load(fis);

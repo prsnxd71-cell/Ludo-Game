@@ -49,34 +49,40 @@ This project brings the traditional Indian board game *Pachisi* / *Ludo* to life
 - Configurable **player names** and color assignments (🔴 Red, 🟢 Green, 🟡 Yellow, 🔵 Blue).
 - Turn indicator displays whose turn it is, complete with matching player-themed banners.
 
-### 2. Phone OTP Authentication (MiniMoth)
+### 2. Realistic 3D Ludo Pieces
+- High-resolution, authentic 3D pawn pieces with transparent backgrounds for each player color (`blue-piece.png`, `red-piece.png`, `green-piece.png`, `yellow-piece.png`).
+- Fluid CSS step-by-step movement animations and golden glow highlights for playable tokens.
+- Smart stacking geometry with symmetrical offsets and scaling so multiple pieces on the same square never hide each other.
+- Responsive design with automatic re-centering during window resizing.
+
+### 3. Phone OTP Authentication (MiniMoth)
 - Secure login flow requesting OTP verification via MiniMoth API.
 - Rejects unauthorized moves and protects game state behind 64-character cryptographically random session tokens.
 - Automatic session caching in `sessionStorage` with instant session verification on page refresh.
 
-### 3. Realistic Dice Rolling & Controls
+### 4. Realistic Dice Rolling & Controls
 - Interactive 3D-styled animated dice cube showing authentic pip dots (1 through 6).
 - Dual roll triggers: click the dice or press the <kbd>Spacebar</kbd>.
 - Rolling a **6** grants an immediate bonus turn.
 
-### 4. Board Movement & Safe Spots
+### 5. Board Movement & Safe Spots
 - 52-tile shared outer track, 4 color-specific 5-tile home stretches, and final center triangles.
 - **8 Safe Spots (Stars):** Cells `1`, `9`, `14`, `22`, `27`, `35`, `40`, and `48` protect pieces from being captured.
 - Tokens cannot leave their home yard until the player rolls a **6**.
 - Pieces require an exact roll to enter the final center triangle.
 
-### 5. Captures & Combat
+### 6. Captures & Combat
 - Landing on an opponent's piece on any non-safe square **captures** it.
 - Captured pieces are sent immediately back to their home yard (steps reset to 0).
 - The capturing player is rewarded with an immediate **bonus turn**.
 
-### 6. Surprise Perks (8 Mystery Gift Cells)
+### 7. Surprise Perks (8 Mystery Gift Cells)
 Evenly spaced on the board (cells `5`, `11`, `18`, `24`, `31`, `37`, `44`, `50`), landing on a Gift Spot triggers a surprise power-up:
 - 🎁 **Extra Turn:** Immediate bonus roll without needing a 6 or capture.
 - 🚀 **Jetpack:** Rockets the piece forward 4 additional spaces automatically.
 - 🍌 **Banana Peel:** Causes the piece to slip backwards 3 spaces (safely stopping before the home yard).
 
-### 7. Finishing & Fair Podium Rankings ($n - 1$ Rule)
+### 8. Finishing & Fair Podium Rankings ($n - 1$ Rule)
 - Moving a piece into the center home triangle awards a bonus roll.
 - A player finishes when all 4 of their pieces reach the center.
 - In 3-player and 4-player games, gameplay continues until only **one** player remains ($n - 1$ rule).
@@ -86,14 +92,14 @@ Evenly spaced on the board (cells `5`, `11`, `18`, `24`, `31`, `37`, `44`, `50`)
   - 🥉 **3rd Place:** 3rd Place
   - ❌ **Defeated (Loser):** Displayed with a defeated badge.
 
-### 8. Match Analysis Dashboard
+### 9. Match Analysis Dashboard
 - Interactive post-game statistics modal breaking down:
   - Total moves played across the match.
   - Total captures executed and perks collected.
   - Total match duration (minutes and seconds).
   - Per-player breakdown table showing moves, captures, and perks collected per color.
 
-### 9. Match Resumption & Disconnect Handling
+### 10. Match Resumption & Disconnect Handling
 - **Heartbeat:** Periodic ping (`/api/games/heartbeat`) keeps active games alive.
 - **Graceful Leave:** Closing or reloading triggers `pagehide` using `fetch(..., { keepalive: true })` and `navigator.sendBeacon` to notify the backend.
 - **Match Resumption:** Active unfinished games are detected upon login with a banner offering to restore the exact board state and pieces.
@@ -119,31 +125,37 @@ Evenly spaced on the board (cells `5`, `11`, `18`, `24`, `31`, `37`, `44`, `50`)
 
 ## 📂 Project Structure
 
-```
+```text
 Ludo-Game/
-├── index.html                   # Single-page game entry point & UI overlays
-├── style.css                    # Consolidated responsive stylesheet
-├── game.js                      # Consolidated game engine & frontend API client
-├── config.properties            # Local configuration (credentials & port, gitignored)
-├── .gitignore                   # Ignores config.properties, *.class, bin/
-├── .gitattributes               # Line-ending & git configuration
-├── README.md                    # Project documentation
+├── backend/
+│   ├── src/
+│   │   ├── Config.java              # Configuration loader for config.properties
+│   │   ├── Database.java            # Reusable JDBC connection, queries & safe DDL
+│   │   ├── DatabaseTest.java        # Simple JDBC connection verification script
+│   │   ├── GameServer.java          # Java HTTP server, REST endpoints & static file server
+│   │   ├── MiniMothClient.java      # MiniMoth REST API client (send & verify OTP)
+│   │   ├── MoveValidator.java       # Server-side validation for game moves & perks
+│   │   ├── SessionManager.java      # In-memory cryptographically secure session manager
+│   │   ├── SimpleJson.java          # Zero-dependency, lightweight JSON parser & builder
+│   │   └── BackendTest.java         # 10-point comprehensive backend verification test suite
+│   ├── lib/
+│   │   └── mysql-connector-java-8.0.28.jar   # Official MySQL JDBC Driver
+│   ├── bin/                         # Compiled Java .class binaries (generated, gitignored)
+│   └── config.properties            # Local configuration (credentials & port, gitignored)
 │
-├── lib/
-│   └── mysql-connector-java-8.0.28.jar   # Official MySQL JDBC Driver
+├── frontend/
+│   ├── images/
+│   │   ├── blue-piece.png           # Realistic 3D piece for Blue player
+│   │   ├── red-piece.png            # Realistic 3D piece for Red player
+│   │   ├── green-piece.png          # Realistic 3D piece for Green player
+│   │   └── yellow-piece.png         # Realistic 3D piece for Yellow player
+│   ├── index.html                   # Single-page game entry point & UI overlays
+│   ├── style.css                    # Consolidated responsive stylesheet
+│   └── game.js                      # Consolidated game engine & frontend API client
 │
-├── src/
-│   ├── Config.java              # Configuration loader for config.properties
-│   ├── Database.java            # Reusable JDBC connection, queries & safe DDL
-│   ├── DatabaseTest.java        # Simple JDBC connection verification script
-│   ├── GameServer.java          # Java HTTP server, REST endpoints & static file server
-│   ├── MiniMothClient.java      # MiniMoth REST API client (send & verify OTP)
-│   ├── MoveValidator.java       # Server-side validation for game moves & perks
-│   ├── SessionManager.java      # In-memory cryptographically secure session manager
-│   ├── SimpleJson.java          # Zero-dependency, lightweight JSON parser & builder
-│   └── BackendTest.java         # 10-point comprehensive backend verification test suite
-│
-└── bin/                         # Compiled Java .class binaries (generated)
+├── .gitignore                       # Ignores config.properties, *.class, bin/
+├── .gitattributes                   # Line-ending & git configuration
+└── README.md                        # Comprehensive project documentation
 ```
 
 ---
@@ -180,7 +192,7 @@ CREATE DATABASE IF NOT EXISTS `ludo_db` DEFAULT CHARACTER SET utf8mb4 COLLATE ut
 
 ### Step 3: Verified Database Schema
 
-The Java backend (`src/Database.java`) verifies and creates the following relational tables automatically upon startup:
+The Java backend (`backend/src/Database.java`) verifies and creates the following relational tables automatically upon startup:
 
 #### 1. `games` Table
 Stores overall match records, player counts, statuses, and full board state snapshots.
@@ -238,7 +250,7 @@ CREATE TABLE IF NOT EXISTS `movements` (
 
 ## 🔧 Configuration
 
-Create or update `config.properties` in the project root directory. This file stores local database credentials, server settings, and your MiniMoth API key:
+Create or update `backend/config.properties`. This file stores local database credentials, server settings, and your MiniMoth API key:
 
 ```properties
 # ==========================================
@@ -273,34 +285,37 @@ server.port=8080
 Ensure XAMPP MySQL is running on port `3306`.
 
 ### Step 2: Compile the Java Backend
-Open a terminal in the project root directory (`LUDO/`) and compile the Java source files into the `bin/` directory:
+You can compile either from the `backend/` folder or from the project root:
 
-- **Windows (PowerShell or Command Prompt):**
+- **Option A: From `backend/` directory (Recommended):**
   ```powershell
+  cd backend
   javac -cp "lib/*;src" -d bin src/*.java
   ```
+  *(On Linux/macOS, use `:` instead of `;`: `javac -cp "lib/*:src" -d bin src/*.java`)*
 
-- **Linux / macOS:**
-  ```bash
-  javac -cp "lib/*:src" -d bin src/*.java
+- **Option B: From project root (`Ludo-Game/`):**
+  ```powershell
+  javac -cp "backend/lib/*;backend/src" -d backend/bin backend/src/*.java
   ```
 
 ### Step 3: Start the Game Server
 Launch the HTTP server:
 
-- **Windows:**
+- **From `backend/` directory:**
   ```powershell
   java -cp "bin;lib/*" GameServer
   ```
+  *(On Linux/macOS: `java -cp "bin:lib/*" GameServer`)*
 
-- **Linux / macOS:**
-  ```bash
-  java -cp "bin:lib/*" GameServer
+- **Or from project root (`Ludo-Game/`):**
+  ```powershell
+  java -cp "backend/bin;backend/lib/*" GameServer
   ```
 
 **Expected Console Output:**
 ```
-[CONFIG] Successfully loaded c:\...\LUDO\config.properties
+[CONFIG] Successfully loaded c:\...\LUDO\backend\config.properties
 [DB] Verified table 'users' exists.
 [DB] Verified table 'movements' exists.
 [DB] Verified column 'last_activity' exists in 'games'.
@@ -361,18 +376,20 @@ http://localhost:8080
 
 ## 🧪 Automated Testing Suite
 
-The repository includes a comprehensive 10-point test suite in `src/BackendTest.java` that validates database operations, session lifecycles, and move rules without modifying live game data.
+The repository includes a comprehensive 10-point test suite in `backend/src/BackendTest.java` that validates database operations, session lifecycles, and move rules without modifying live game data.
 
 To run the verification test suite:
 
-- **Windows:**
+- **From `backend/` directory (Recommended):**
   ```powershell
+  cd backend
   java -cp "bin;lib/*" BackendTest
   ```
+  *(On Linux/macOS: `java -cp "bin:lib/*" BackendTest`)*
 
-- **Linux / macOS:**
-  ```bash
-  java -cp "bin:lib/*" BackendTest
+- **Or from project root (`Ludo-Game/`):**
+  ```powershell
+  java -cp "backend/bin;backend/lib/*" BackendTest
   ```
 
 ### Test Coverage

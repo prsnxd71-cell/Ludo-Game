@@ -182,32 +182,51 @@ body {
 
 .piece {
     position: absolute;
-    width: 6.66%; height: 6.66%;
-    border-radius: 50%; border: 2px solid white;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.5), inset 0 -3px 5px rgba(0,0,0,0.3);
+    width: 6.666%;
+    height: 6.666%;
     z-index: 10;
     pointer-events: auto;
-    transition: top 0.2s linear, left 0.2s linear, transform 0.2s;
-    display: flex; justify-content: center; align-items: center;
+    transition: top 0.2s linear, left 0.2s linear, transform 0.2s ease-out;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    user-select: none;
+    -webkit-user-select: none;
 }
-.piece::after { content: ''; width: 40%; height: 40%; background: rgba(255,255,255,0.4); border-radius: 50%; }
 
-.piece.red { background: radial-gradient(circle at 30% 30%, #ff5252, #c62828); }
-.piece.green { background: radial-gradient(circle at 30% 30%, #69f0ae, #2e7d32); }
-.piece.yellow { background: radial-gradient(circle at 30% 30%, #ffff00, #f57f17); }
-.piece.blue { background: radial-gradient(circle at 30% 30%, #448aff, #1565c0); }
+/* 3D Realistic Piece Image */
+.piece-img {
+    width: 92%;
+    height: 92%;
+    object-fit: contain;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.45));
+    transition: filter 0.2s ease, transform 0.2s ease;
+}
 
 /* Highlighting valid pieces */
 .piece.highlight {
     cursor: pointer;
-    box-shadow: 0 0 15px 5px #000, inset 0 -3px 5px rgba(0,0,0,0.3);
-    z-index: 20;
-    animation: bounce 0.6s infinite alternate;
+    z-index: 25 !important;
+    animation: bounce 0.6s infinite alternate ease-in-out;
+}
+
+.piece.highlight .piece-img {
+    filter: drop-shadow(0 0 6px #ffd700) drop-shadow(0 0 12px rgba(255, 215, 0, 0.85)) drop-shadow(0 4px 6px rgba(0, 0, 0, 0.5));
+}
+
+.piece.highlight:hover .piece-img {
+    filter: drop-shadow(0 0 8px #ffffff) drop-shadow(0 0 15px #ffd700) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+    transform: scale(1.08);
 }
 
 @keyframes bounce {
     0% { margin-top: 0; }
-    100% { margin-top: -5px; }
+    100% { margin-top: -6px; }
 }
 
 @media(max-width: 900px) {

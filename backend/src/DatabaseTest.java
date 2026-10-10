@@ -22,11 +22,22 @@ public class DatabaseTest {
         Properties props = new Properties();
 
         // 1. Load configuration from config.properties
-        try (FileInputStream fis = new FileInputStream("config.properties")) {
-            props.load(fis);
-            System.out.println("[INFO] Loaded configuration from config.properties");
-        } catch (IOException e) {
-            System.out.println("[WARN] Could not load config.properties (" + e.getMessage() + "), using defaults.");
+        java.io.File cfgFile = new java.io.File("config.properties");
+        if (!cfgFile.exists()) {
+            cfgFile = new java.io.File("backend/config.properties");
+        }
+        if (!cfgFile.exists()) {
+            cfgFile = new java.io.File("../config.properties");
+        }
+        if (cfgFile.exists()) {
+            try (FileInputStream fis = new FileInputStream(cfgFile)) {
+                props.load(fis);
+                System.out.println("[INFO] Loaded configuration from " + cfgFile.getAbsolutePath());
+            } catch (IOException e) {
+                System.out.println("[WARN] Could not load config.properties (" + e.getMessage() + "), using defaults.");
+            }
+        } else {
+            System.out.println("[WARN] config.properties not found on disk, using defaults.");
         }
 
         String host = props.getProperty("db.host", "localhost");

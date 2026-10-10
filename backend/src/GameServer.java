@@ -567,7 +567,13 @@ public class GameServer {
 
             // Remove leading slash
             String relativePath = path.startsWith("/") ? path.substring(1) : path;
-            File file = new File(relativePath);
+            File file = new File("frontend", relativePath);
+            if (!file.exists() || file.isDirectory()) {
+                file = new File("../frontend", relativePath);
+            }
+            if (!file.exists() || file.isDirectory()) {
+                file = new File(relativePath);
+            }
 
             if (!file.exists() || file.isDirectory()) {
                 String msg = "404 Not Found: " + path;

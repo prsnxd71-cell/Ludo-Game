@@ -625,6 +625,13 @@ function createPieces() {
   const container = document.getElementById("pieces-container");
   container.innerHTML = "";
 
+  const pieceImages = {
+    blue: "images/blue-piece.png",
+    red: "images/red-piece.png",
+    green: "images/green-piece.png",
+    yellow: "images/yellow-piece.png",
+  };
+
   for (let color of activePlayers) {
     for (let i = 0; i < 4; i++) {
       // Create a simple object for each piece
@@ -637,10 +644,18 @@ function createPieces() {
 
       allPieces.push(piece);
 
-      // Create the HTML circle for the piece
+      // Create the HTML container for the piece
       const htmlElement = document.createElement("div");
       htmlElement.id = piece.id;
       htmlElement.classList.add("piece", color);
+
+      // Create the realistic 3D piece image
+      const img = document.createElement("img");
+      img.src = pieceImages[color] || `images/${color}-piece.png`;
+      img.alt = `${color.toUpperCase()} piece`;
+      img.className = "piece-img";
+      img.draggable = false;
+      htmlElement.appendChild(img);
 
       // When the user clicks the piece on the screen, trigger onPieceClick
       htmlElement.onclick = function () {
@@ -781,7 +796,7 @@ function getPieceCoordinates(piece) {
   }
 }
 
-// Places the HTML circles in the correct spot on the board
+// Places the 3D piece elements in the correct spots on the board
 function drawPieces() {
   let cellsOccupied = {};
 
@@ -789,49 +804,74 @@ function drawPieces() {
   for (let piece of allPieces) {
     let coords = getPieceCoordinates(piece);
     let htmlElement = document.getElementById(piece.id);
+    if (!htmlElement || !coords) continue;
 
     // Convert the 1-15 coordinate to a CSS percentage for placement
     htmlElement.style.left = (coords.col - 1) * (100 / 15) + "%";
     htmlElement.style.top = (coords.row - 1) * (100 / 15) + "%";
 
-    // Track how many pieces share this spot (to arrange them neatly later)
-    if (piece.status === "ACTIVE") {
+    // Track pieces sharing the same spot (both on active track and in finished area)
+    if (piece.status === "ACTIVE" || piece.status === "FINISHED") {
       let key = coords.col + "," + coords.row;
       if (!cellsOccupied[key]) {
         cellsOccupied[key] = [];
       }
       cellsOccupied[key].push(piece);
     } else {
-      // Home and finished pieces stay centered
+      // Home pieces stay centered on their assigned yard spot
       htmlElement.style.transform = "translate(0px, 0px) scale(1)";
+      htmlElement.style.zIndex = "10";
     }
   }
 
-  // 2. If multiple pieces share one track cell, shrink and shift them slightly
+  // 2. If multiple pieces share one cell, arrange, offset, and scale them neatly
   for (let key in cellsOccupied) {
     let piecesOnSpot = cellsOccupied[key];
 
     if (piecesOnSpot.length > 1) {
-      // Arrange stacked pieces so they don't completely hide each other
-      const visualOffsets = [
-        { x: 0, y: 0 },
-        { x: 6, y: 6 },
-        { x: -6, y: -6 },
-        { x: 6, y: -6 },
-        { x: -6, y: 6 },
-      ];
+      let visualOffsets = [];
+      let scale = 0.8;
+
+      if (piecesOnSpot.length === 2) {
+        visualOffsets = [
+          { x: -5, y: -2 },
+          { x: 5, y: 2 },
+        ];
+        scale = 0.82;
+      } else if (piecesOnSpot.length === 3) {
+        visualOffsets = [
+          { x: 0, y: -5 },
+          { x: -5, y: 4 },
+          { x: 5, y: 4 },
+        ];
+        scale = 0.74;
+      } else {
+        visualOffsets = [
+          { x: -5, y: -5 },
+          { x: 5, y: -5 },
+          { x: -5, y: 5 },
+          { x: 5, y: 5 },
+          { x: 0, y: 0 },
+        ];
+        scale = 0.68;
+      }
 
       for (let i = 0; i < piecesOnSpot.length; i++) {
         let piece = piecesOnSpot[i];
         let htmlElement = document.getElementById(piece.id);
-        let offset = visualOffsets[i % 5];
-        htmlElement.style.transform = `translate(${offset.x}px, ${offset.y}px) scale(0.8)`;
+        if (!htmlElement) continue;
+        let offset = visualOffsets[i % visualOffsets.length];
+        htmlElement.style.transform = `translate(${offset.x}px, ${offset.y}px) scale(${scale})`;
+        htmlElement.style.zIndex = (10 + i).toString();
       }
     } else {
-      // Just one piece here, make sure it's centered and normal size
+      // Single piece: perfectly centered and full size
       let piece = piecesOnSpot[0];
       let htmlElement = document.getElementById(piece.id);
-      htmlElement.style.transform = "translate(0px, 0px) scale(1)";
+      if (htmlElement) {
+        htmlElement.style.transform = "translate(0px, 0px) scale(1)";
+        htmlElement.style.zIndex = "10";
+      }
     }
   }
 }
@@ -1604,6 +1644,7 @@ async function sendHeartbeat() {
 // Browser Close / Disconnect Handler
 window.addEventListener("pagehide", handleBrowserLeave);
 window.addEventListener("beforeunload", handleBrowserLeave);
+window.addEventListener("resize", drawPieces);
 
 function handleBrowserLeave(event) {
   // Only trigger if an actual game is ongoing and not finished
