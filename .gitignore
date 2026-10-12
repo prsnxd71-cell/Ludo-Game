@@ -1,9 +1,25 @@
-# Sensitive configuration with credentials and API keys
-config.properties
-
 # Compiled Java class files
 *.class
 bin/
 
-# Local scratch / notes
+# IDE and Editor files
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Sensitive configuration & local files
+config.properties
 imp.txt
+
+# Local project documentation and archives
+project-knowledge/
+project-knowledge.zip
+Ludo_Game_Mini_Project_Report.docx
