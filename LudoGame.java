@@ -51,7 +51,9 @@ public class LudoGame extends JFrame {
     public enum PerkType {
         EXTRA_TURN("Extra Roll", "Surprise! Extra turn awarded!", Color.MAGENTA),
         JETPACK("Jetpack", "Jetpack! Flew forward 4 spaces!", new Color(0, 150, 136)),
-        BANANA_PEEL("Banana Peel", "Banana Peel! Slipped backward 3 spaces!", new Color(255, 112, 67));
+        BANANA_PEEL("Banana Peel", "Banana Peel! Slipped backward 3 spaces!", new Color(255, 112, 67)),
+        SHIELD("Magic Shield", "Magic Shield! This piece is protected from its next capture!", new Color(33, 150, 243)),
+        LUCKY_BOOST("Lucky Boost", "Lucky Boost! Move forward 2 extra spaces!", new Color(255, 193, 7));
 
         public final String title;
         public final String description;
@@ -92,6 +94,7 @@ public class LudoGame extends JFrame {
         public final int pieceIndex;
         public PieceStatus status = PieceStatus.HOME;
         public int stepsTaken = 0;
+        public boolean shielded = false;
 
         public Piece(PlayerColor color, int pieceIndex) {
             this.color = color;
@@ -116,6 +119,7 @@ public class LudoGame extends JFrame {
         public void resetToHome() {
             this.status = PieceStatus.HOME;
             this.stepsTaken = 0;
+            this.shielded = false;
         }
     }
 
@@ -378,9 +382,13 @@ public class LudoGame extends JFrame {
 
         rollDiceButton = new JButton("Roll Dice (Space)");
         rollDiceButton.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        rollDiceButton.setBackground(new Color(33, 150, 243));
+        rollDiceButton.setBackground(Color.BLACK);
         rollDiceButton.setForeground(Color.WHITE);
+        rollDiceButton.setOpaque(true);
+        rollDiceButton.setContentAreaFilled(true);
+        rollDiceButton.setBorderPainted(false);
         rollDiceButton.setFocusPainted(false);
+        rollDiceButton.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
         rollDiceButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         rollDiceButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         rollDiceButton.setMaximumSize(new Dimension(210, 42));
@@ -481,9 +489,14 @@ public class LudoGame extends JFrame {
 
         JButton startBtn = new JButton("Launch Game");
         startBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        startBtn.setBackground(new Color(76, 175, 80));
+        startBtn.setBackground(Color.BLACK);
         startBtn.setForeground(Color.WHITE);
+        startBtn.setOpaque(true);
+        startBtn.setContentAreaFilled(true);
+        startBtn.setBorderPainted(false);
         startBtn.setFocusPainted(false);
+        startBtn.setBorder(BorderFactory.createEmptyBorder(8, 12, 8, 12));
+        startBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         startBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
         startBtn.setMaximumSize(new Dimension(160, 38));
         startBtn.addActionListener(e -> {
@@ -691,8 +704,12 @@ public class LudoGame extends JFrame {
             if (other.color == movedPiece.color) continue;
             for (Piece otherPiece : other.pieces) {
                 if (otherPiece.status == PieceStatus.ACTIVE && getTrackIndex(otherPiece) == trackIndex) {
-                    otherPiece.resetToHome();
-                    didCapture = true;
+                    if (otherPiece.shielded) {
+                        otherPiece.shielded = false;
+                    } else {
+                        otherPiece.resetToHome();
+                        didCapture = true;
+                    }
                 }
             }
         }
@@ -742,11 +759,45 @@ public class LudoGame extends JFrame {
                     });
                     pieceMoveTimer.start();
                     break;
+                case SHIELD:
+                    piece.shielded = true;
+                    boardPanel.repaint();
+                    endTurn();
+                    break;
+                case LUCKY_BOOST:
+                    int boostTarget = Math.min(57, piece.stepsTaken + 2);
+                    pieceMoveTimer = new Timer(90, null);
+                    pieceMoveTimer.addActionListener(e -> {
+                        piece.stepsTaken++;
+                        if (piece.stepsTaken >= 57) piece.status = PieceStatus.FINISHED;
+                        boardPanel.repaint();
+                        if (piece.stepsTaken >= boostTarget || piece.status == PieceStatus.FINISHED) {
+                            pieceMoveTimer.stop();
+                            Player current = getCurrentPlayer();
+                            if (piece.status == PieceStatus.FINISHED) {
+                                playerGetsExtraTurn = true;
+                                if (current != null && current.hasFinished()) {
+                                    current.finishRank = finishedRanking.size() + 1;
+                                    finishedRanking.add(current);
+                                    int threshold = Math.max(1, activePlayers.size() - 1);
+                                    if (finishedRanking.size() >= threshold) {
+                                        onMatchCompleted();
+                                        return;
+                                    }
+                                }
+                            }
+                            boolean captured = checkOpponentCapture(piece);
+                            if (captured) playerGetsExtraTurn = true;
+                            endTurn();
+                        }
+                    });
+                    pieceMoveTimer.start();
+                    break;
                 case BANANA_PEEL:
                     int backwardTarget = Math.max(1, piece.stepsTaken - 3);
                     pieceMoveTimer = new Timer(90, null);
                     pieceMoveTimer.addActionListener(e -> {
-                        piece.stepsTaken--;
+                        piece.stepsTaken = Math.max(1, piece.stepsTaken - 1);
                         boardPanel.repaint();
                         if (piece.stepsTaken <= backwardTarget) {
                             pieceMoveTimer.stop();
